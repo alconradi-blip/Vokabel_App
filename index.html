@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vokabel-Lern-App</title>
+    <!-- Playful Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app-container">
+        <!-- Navigation / Header -->
+        <header>
+            <div class="logo" id="logo-btn" onclick="app.showDashboard()">
+                <i class="fa-solid fa-graduation-cap"></i> Vokabel-Abenteuer
+            </div>
+            <div class="stars">
+                <i class="fa-solid fa-star"></i> <span id="star-count">0</span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main>
+            <!-- Dashboard View -->
+            <section id="view-dashboard" class="view active">
+                <h1>Willkommen zurück!</h1>
+                <div class="dashboard-cards">
+                    <div class="card current-week-card">
+                        <h2>Dein Lernziel</h2>
+                        <div class="selection-group">
+                            <label for="week-selector">Woche:</label>
+                            <select id="week-selector" onchange="app.changeWeek(this.value)"></select>
+                            
+                            <label for="day-selector" style="margin-left: 10px;">Tag:</label>
+                            <select id="day-selector" onchange="app.changeDay(this.value)"></select>
+                        </div>
+                        <button class="btn btn-primary btn-large pulse mt-2" id="start-learning-btn" onclick="app.startDailyVocab()">
+                            <i class="fa-solid fa-play"></i> Vokabeln lernen!
+                        </button>
+                    </div>
+                    
+                    <div class="card test-card">
+                        <h2>Teste dich selbst!</h2>
+                        <p>Bist du bereit für eine kleine Herausforderung?</p>
+                        <button class="btn btn-secondary" onclick="app.showTestSetup()">
+                            <i class="fa-solid fa-puzzle-piece"></i> Test starten
+                        </button>
+                    </div>
+                    
+                    <div class="card progress-card">
+                        <h2>Dein Fortschritt</h2>
+                        <button class="btn btn-tertiary" onclick="app.resetProgress()">
+                            <i class="fa-solid fa-rotate-right"></i> Zurücksetzen
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Daily Vocabulary View -->
+            <section id="view-daily-vocab" class="view hidden">
+                <div class="top-bar">
+                    <button class="btn btn-icon" onclick="app.showDashboard()"><i class="fa-solid fa-arrow-left"></i></button>
+                    <h2>Tag <span id="vocab-day"></span>: <span id="vocab-topic"></span></h2>
+                    <span></span>
+                </div>
+                
+                <div class="flashcard-container">
+                    <div class="flashcard" id="current-flashcard" onclick="app.flipCard()">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="lang-label">Deutsch</div>
+                                <h1 id="card-front-text"></h1>
+                                <p class="hint">Klicke zum Umdrehen</p>
+                            </div>
+                            <div class="flashcard-back">
+                                <div class="lang-label">Englisch</div>
+                                <h1 id="card-back-text"></h1>
+                                <button class="btn btn-icon btn-speak" onclick="app.speakWord(event)"><i class="fa-solid fa-volume-high"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-secondary" id="prev-word-btn" onclick="app.prevWord()">Zurück</button>
+                    <span id="word-progress">1 / 5</span>
+                    <button class="btn btn-primary" id="next-word-btn" onclick="app.nextWord()">Weiter</button>
+                    <button class="btn btn-success hidden" id="finish-daily-btn" onclick="app.finishDaily()">Fertig!</button>
+                </div>
+            </section>
+
+            <!-- Test Setup View -->
+            <section id="view-test-setup" class="view hidden">
+                <div class="top-bar">
+                    <button class="btn btn-icon" onclick="app.showDashboard()"><i class="fa-solid fa-arrow-left"></i></button>
+                    <h2>Test erstellen</h2>
+                    <span></span>
+                </div>
+                
+                <div class="card setup-container">
+                    <h3>Welche Wochen möchtest du testen?</h3>
+                    <div id="week-selection" class="week-selection">
+                        <!-- Checkboxes will be generated here -->
+                    </div>
+                    <button class="btn btn-primary btn-large mt-2" onclick="app.startTest()">
+                        Los geht's! <i class="fa-solid fa-rocket"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Test View -->
+            <section id="view-test" class="view hidden">
+                <div class="top-bar">
+                    <button class="btn btn-icon" onclick="app.cancelTest()"><i class="fa-solid fa-xmark"></i></button>
+                    <h2>Vokabeltest</h2>
+                    <div class="score-display">Punkte: <span id="test-score">0</span></div>
+                </div>
+                
+                <div class="test-container card">
+                    <h3 id="test-question-title">Was heißt dieses Wort auf Englisch?</h3>
+                    <h1 id="test-word" class="test-word-display">Wort</h1>
+                    
+                    <!-- Multiple Choice Area -->
+                    <div id="test-mc-area" class="mc-grid hidden">
+                        <button class="btn btn-mc" onclick="app.checkMcAnswer(0)" id="mc-btn-0"></button>
+                        <button class="btn btn-mc" onclick="app.checkMcAnswer(1)" id="mc-btn-1"></button>
+                        <button class="btn btn-mc" onclick="app.checkMcAnswer(2)" id="mc-btn-2"></button>
+                        <button class="btn btn-mc" onclick="app.checkMcAnswer(3)" id="mc-btn-3"></button>
+                    </div>
+
+                    <!-- Type Area -->
+                    <div id="test-type-area" class="type-area hidden">
+                        <input type="text" id="test-type-input" placeholder="Englische Übersetzung..." autocomplete="off" onkeypress="app.handleTypeKeyPress(event)">
+                        <button class="btn btn-primary mt-1" onclick="app.checkTypeAnswer()">Prüfen</button>
+                    </div>
+
+                    <div id="test-feedback" class="feedback hidden"></div>
+                    <button class="btn btn-primary hidden" id="test-next-btn" onclick="app.nextTestQuestion()">Nächste Frage</button>
+                </div>
+            </section>
+            
+            <!-- Test Result View -->
+            <section id="view-test-result" class="view hidden">
+                <div class="result-card card">
+                    <div class="trophy"><i class="fa-solid fa-trophy"></i></div>
+                    <h2>Test Beendet!</h2>
+                    <p>Du hast <span id="final-score" class="highlight">0</span> von <span id="total-questions" class="highlight">0</span> richtig!</p>
+                    <div class="stars-earned">+<span id="stars-earned-amount">0</span> Sterne</div>
+                    <button class="btn btn-primary btn-large mt-2" onclick="app.showDashboard()">Zurück zur Übersicht</button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Celebration Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <script src="data.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
